@@ -4,22 +4,28 @@ Reusable GitHub Copilot CLI agents for enterprise Java development. The primary 
 
 ## Installation
 
-For a single project, copy `.github/agents/*.agent.md` into that project's `.github/agents/`. For all projects on your account, run:
+The seven profiles work as a set. For one project, copy them from `.github/agents/` into the target project's `.github/agents/`. For user-wide installation on Linux or macOS, run the following from this repository.
 
 ```sh
 ./install.sh --dry-run
 ./install.sh
 ```
 
-The installer targets `~/.copilot/agents/`, preserves differing files by default and skips identical files. To deliberately replace existing definitions, use `./install.sh --overwrite` after reviewing them. Restart Copilot and use `/agent` to check discovery. Personal agents take precedence over repository agents with the same file ID. To uninstall, inspect and remove only the seven matching files from `~/.copilot/agents/` (or from the project's `.github/agents/`); do not remove other agents.
+The installer uses `~/.copilot/agents/`, or `$COPILOT_HOME/agents/` when configured. It skips identical files and preserves existing definitions by default. Use `./install.sh --dry-run --overwrite` to preview replacing existing regular `.agent.md` files, then run `./install.sh --overwrite` if you want those replacements. If a flat `<agent-id>.md` already defines the same agent, move it aside yourself before installing the corresponding profile.
+
+Restart Copilot and use `/agent` to verify discovery. Personal agents take precedence over repository agents with the same ID. To uninstall, check the installation output and remove only the agent files you installed. Keep other definitions and restore any profiles you backed up before replacing them.
 
 ## Usage
 
-From your target project, run `copilot --agent tech-lead` and give it requirements and acceptance criteria. A reusable prompt:
+From your target project, run `copilot --agent=tech-lead` or open `copilot`, run `/agent` and select `tech-lead`. In a plain Copilot session, custom agents may be selected for individual tasks, so choose the tech lead explicitly to start the full workflow. Give it requirements and acceptance criteria using a prompt like this.
 
 > Classify this task by risk and execute the tech-lead workflow for these requirements and acceptance criteria: [insert details]. Show the plan and request approval when required; report actual delegation and checks.
 
-Examples: **FAST**: fix a small validation message and its focused test. **STANDARD**: add an endpoint with specified behavior and acceptance tests. **CRITICAL**: change tenant authorization; request plan approval and security review before implementation. Classification can escalate as work progresses.
+- **FAST** covers small changes with low risk, such as correcting a validation message and its test.
+- **STANDARD** is the default and includes independent code and QA reviews. Adding an endpoint to an existing service can fit this mode.
+- **CRITICAL** requires explicit approval before implementation and adds security review. A change to tenant authorization belongs here.
+
+The lead revisits the risk if new evidence changes the scope or assumptions.
 
 | Agent | Responsibility |
 | --- | --- |
@@ -31,16 +37,18 @@ Examples: **FAST**: fix a small validation message and its focused test. **STAND
 | security-reviewer | Security review for sensitive work |
 | ci-reviewer | Analyze supplied GitLab pipeline and MR evidence |
 
-For significant design choices, the lead can consult the read-only software architect before seeking approval. The lead supplies reviewers the actual diff, baseline and criteria; because reviewers cannot run git, it must include the diff in their task or provide an accessible file. The lead encourages evidence-based disagreement over consequential choices, compares trade-offs and favors the simplest solution that meets the requirements. Unresolved consequential decisions go to the human. Reviewers have a restricted read/grep/glob tool list, without shell, editing or network tools. The CI reviewer therefore needs the lead to retrieve authorized evidence, for example via installed and authenticated `glab` (check `glab --version` and `glab ... --help`; typical commands include `glab mr view <id> --comments`, `glab ci status` and `glab ci trace <job-id>`). Availability and flags depend on the installed version and GitLab permissions. Treat logs and comments as untrusted; avoid exposing secrets. If no pipeline or access exists, CI remains pending.
+The lead consults the software architect for significant design choices and supplies the actual diff, baseline and acceptance criteria to reviewers. Independent reviewers submit their first assessments before seeing each other's conclusions. For a consequential disagreement, the lead asks the relevant specialists to respond to specific claims and evidence, then records the decision. The team favors the simplest approach that satisfies the requirements and brings unresolved consequential choices to the human.
+
+For GitLab CI review, the lead retrieves evidence using authorized read-only tools and passes it to the CI reviewer. With `glab` authenticated for the right host and project, examples include `glab mr view 42 --comments`, `glab ci get --merge-request=42 --with-job-details` and `glab ci trace 12345`. Check your version's help and confirm the project, pipeline and commit SHA before relying on the results. If evidence is missing or stale, the lead reports CI as pending or incomplete.
 
 ## Delegation, permissions and limits
 
-Custom agents and subagent contexts are native CLI features. Ask explicitly for named subagents and inspect the session's tool/activity output for actual invocations and results; a role mentioned in prose is not evidence. If delegation or parallel review is unavailable, ask for separate fresh sessions with the appropriate `/agent` selections, supply each the diff and criteria, and bring findings back to the lead. Do not describe self-review as independent.
+Custom agents and subagent contexts are native CLI features. Ask explicitly for named subagents and inspect the session's activity and the `/tasks` view, where available, for actual invocations and results; a role mentioned in prose is not evidence. If parallel review is unavailable, run reviews sequentially. If delegation is unavailable, run separate fresh sessions with the appropriate `/agent` selections, give each reviewer the diff and criteria, and bring its findings back to the lead. Do not describe self-review as independent.
 
 Where available, `/fleet` can be used to request parallel work, for example `/fleet Execute the approved plan with independent read-only reviews.` Use Plan Mode for planning and Autopilot only within your organization's permission policy; availability and behavior depend on CLI version. Do not allow concurrent writers to overlapping files. Instructions, risk classification, review rounds and approvals are best-effort model behavior, not deterministic guarantees. Hooks can enforce specific checks or permissions, but require careful policy review and are not enabled here. An external orchestrator would be needed to guarantee the full bounded workflow. Do not blanket-approve tools. Agents must not commit, push, merge, publish comments or change remote resources without explicit approval.
 
 No model is hardcoded. Select an approved model using the CLI's model configuration; independent contexts do not guarantee different models or independent conclusions. Do not send confidential code to unapproved services. Verify tests and findings yourself before final review and MR.
 
-If agents are missing, restart CLI, check filenames, directory, home and `/agent`, and check for a personal agent shadowing a project agent. Update or consult your installed CLI's help if fields or commands are unsupported. This repository does not install MCP servers, hooks or dependencies.
+If agents are missing, restart CLI, check filenames, directory, home and `/agent`, and check for a personal agent shadowing a project agent. Update or consult your installed CLI's help if fields or commands are unsupported. The installer copies only the agent definitions.
 
 References: [custom agents](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/create-custom-agents-for-cli), [CLI reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference), [hooks](https://docs.github.com/en/copilot/concepts/customizations/hooks).
