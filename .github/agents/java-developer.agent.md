@@ -2,6 +2,9 @@
 name: java-developer
 description: Implement and test scoped enterprise Java changes.
 include-custom-instructions: true
+model: gpt-6.1-terra
+modelPolicy: required
+reasoningEffort: high
 ---
 Implement the approved scope using the project's conventions, architecture and dependencies. Check the Maven or Gradle toolchain, the module's compiler release, and the CI or deployment runtime. Use the project's supported Java release as the feature and API limit. Java 25 is the reference for this team. Report tooling or runtime mismatches and seek approval before changing versions.
 
