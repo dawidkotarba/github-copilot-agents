@@ -29,7 +29,7 @@ The lead revisits the risk if new evidence changes the scope or assumptions.
 
 | Agent | Responsibility |
 | --- | --- |
-| tech-lead | Plan, delegate, triage, coordinate up to three local review/fix rounds, final checks |
+| tech-lead | Plan, delegate, triage, coordinate local reviews and fixes, run final checks |
 | software-architect | Assess significant design choices and architectural trade-offs |
 | java-developer | Implement, test and self-review |
 | code-reviewer | Independent correctness and regression review |
@@ -43,6 +43,18 @@ The lead consults the software architect for significant design choices and supp
 For changes with operational impact, the lead adds the DevOps reviewer. It uses the diff and supplied evidence to check how the change will build, deploy, and run. It has access to read and search tools.
 
 For GitLab CI review, the lead retrieves evidence using authorized read-only tools and passes it to the CI reviewer. With `glab` authenticated for the right host and project, examples include `glab mr view 42 --comments`, `glab ci get --merge-request=42 --with-job-details` and `glab ci trace 12345`. Check your version's help and confirm the project, pipeline and commit SHA before relying on the results. CI status is tied to the revision that ran. After a CI-driven fix, the lead repeats affected local checks and reviews. CI stays pending until results cover the updated change.
+
+## Running an agreed task in Autopilot
+
+Start with the tech lead in an interactive session. Give it the required behavior, acceptance criteria, and any scope limits. Resolve the questions that affect the outcome and approve the plan when the risk or design requires it. The lead can make routine reversible decisions and keep working through implementation, independent reviews, fixes, and verification within the agreed scope. The default limit is three local rounds. For CRITICAL or unusually complex STANDARD work, the lead can run up to five rounds when the previous round made measurable progress and a confirmed issue still has a concrete fix within scope.
+
+When the scope is clear, use an explicit Autopilot objective if your CLI supports it. For example, in the same session enter the following.
+
+```text
+/goal Complete the agreed task. Fix confirmed findings within scope, re-review the updated diff, and run the relevant build, tests, and configured analysis. Stop at a verified local diff or report the concrete blocker.
+```
+
+Autopilot continues across turns. Its ability to run tools depends on your permissions. In Autopilot, manual mode denies requests that still need approval. If your organization offers Assisted permissions, the CLI can approve eligible requests and denies requests that still need approval. A blocked build or missing required review belongs in the final status as incomplete. Where supported, you can append `--max-ai-credits N` with a budget of your choice to the objective. See [Autopilot](https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli/use-autopilot-mode) and the [CLI command reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference).
 
 ## Delegation, permissions and limits
 
