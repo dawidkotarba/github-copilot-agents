@@ -1,6 +1,6 @@
 # github-copilot-agents
 
-Reusable GitHub Copilot CLI agents for enterprise Java development. The primary target is Java 25, but agents inspect the actual project toolchain and do not upgrade it automatically.
+Reusable GitHub Copilot CLI agents for enterprise Java development. Java 25 is the reference version. The agents follow the target project's instructions, Java release, build tooling, and conventions. API, database, integration testing, and rollout guidance applies when the change touches those areas.
 
 ## Installation
 
@@ -56,11 +56,22 @@ When the scope is clear, use an explicit Autopilot objective if your CLI support
 
 Autopilot continues across turns. Its ability to run tools depends on your permissions. In Autopilot, manual mode denies requests that still need approval. If your organization offers Assisted permissions, the CLI can approve eligible requests and denies requests that still need approval. A blocked build or missing required review belongs in the final status as incomplete. Where supported, you can append `--max-ai-credits N` with a budget of your choice to the objective. See [Autopilot](https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli/use-autopilot-mode) and the [CLI command reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference).
 
+## Optional delivery to a task branch
+
+Authorize the Git steps in the task prompt or before starting Autopilot. For a push, specify the remote and task branch. The tech lead uses that approval once the required checks and reviews pass. You can also authorize only a local commit. The default remains a verified local diff.
+
+```text
+After the required local checks and reviews pass, commit only this task's changes.
+I authorize pushing the commit to the ai/customer-validation branch on origin.
+```
+
+Git access to the approved remote is sufficient. The tech lead reports the commit SHA, the remote branch, and whether the push succeeded.
+
 ## Delegation, permissions and limits
 
 Custom agents and subagent contexts are native CLI features. Ask explicitly for named subagents and inspect the session's activity and the `/tasks` view, where available, for actual invocations and results; a role mentioned in prose is not evidence. If parallel review is unavailable, run reviews sequentially. If delegation is unavailable, run separate fresh sessions with the appropriate `/agent` selections, give each reviewer the diff and criteria, and bring its findings back to the lead. Do not describe self-review as independent.
 
-Where available, `/fleet` can be used to request parallel work, for example `/fleet Execute the approved plan with independent read-only reviews.` Use Plan Mode for planning and Autopilot only within your organization's permission policy; availability and behavior depend on CLI version. Do not allow concurrent writers to overlapping files. Instructions, risk classification, review rounds and approvals are best-effort model behavior, not deterministic guarantees. Hooks can enforce specific checks or permissions, but require careful policy review and are not enabled here. An external orchestrator would be needed to guarantee the full bounded workflow. Do not blanket-approve tools. Agents must not commit, push, merge, publish comments or change remote resources without explicit approval.
+Where available, `/fleet` can be used to request parallel work, for example `/fleet Execute the approved plan with independent read-only reviews.` Use Plan Mode for planning and Autopilot only within your organization's permission policy; availability and behavior depend on CLI version. Do not allow concurrent writers to overlapping files. Instructions, risk classification, review rounds and approvals are best-effort model behavior, not deterministic guarantees. Hooks can enforce specific checks or permissions, but require careful policy review and are not enabled here. An external orchestrator would be needed to guarantee the full bounded workflow. Do not blanket-approve tools. The optional delivery workflow uses explicit authorization for the commit and push. Other remote changes require separate approval.
 
 The tech lead, architect and CI reviewer require GPT-6.2 Sol; the other agents require GPT-6.1 Terra. All request high reasoning effort. These pinned versions require updates when newer models become available. Model availability depends on your plan and organization settings. Select a concrete session model rather than Auto when relying on per-agent model assignments; inspect actual task details to verify the models used. Required model policy prevents a silent fallback when a required model is unavailable; reasoning effort can still be overridden by session or per-agent settings. Independent contexts do not guarantee different models or independent conclusions. Do not send confidential code to unapproved services. Verify tests and findings yourself before final review and MR.
 
