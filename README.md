@@ -38,11 +38,11 @@ The lead revisits the risk if new evidence changes the scope or assumptions.
 | devops-reviewer | Review infrastructure, deployment, and pipeline configuration changes |
 | ci-reviewer | Analyze supplied GitLab pipeline and MR evidence |
 
-The lead consults the software architect for significant design choices and supplies the actual diff, baseline and acceptance criteria to reviewers. Independent reviewers submit their first assessments before seeing each other's conclusions. For a consequential disagreement, the lead asks the relevant specialists to respond to specific claims and evidence, then records the decision. The team favors designs that meet the requirements and stay easy to read, test, and change. Extra structure should solve a concrete problem. The lead brings unresolved consequential choices to the human.
+The lead consults the software architect for significant design choices and supplies the same diff snapshot, baseline, and acceptance criteria to independent reviewers. Independent reviewers submit their first assessments before seeing each other's conclusions. For a consequential disagreement, the lead asks the relevant specialists to respond to specific claims and evidence, then records the decision. The team favors designs that meet the requirements and stay easy to read, test, and change. Extra structure should solve a concrete problem. The lead brings unresolved consequential choices to the human.
 
 For changes with operational impact, the lead adds the DevOps reviewer. It uses the diff and supplied evidence to check how the change will build, deploy, and run. It has access to read and search tools.
 
-For GitLab CI review, the lead retrieves evidence using authorized read-only tools and passes it to the CI reviewer. With `glab` authenticated for the right host and project, examples include `glab mr view 42 --comments`, `glab ci get --merge-request=42 --with-job-details` and `glab ci trace 12345`. Check your version's help and confirm the project, pipeline and commit SHA before relying on the results. If evidence is missing or stale, the lead reports CI as pending or incomplete.
+For GitLab CI review, the lead retrieves evidence using authorized read-only tools and passes it to the CI reviewer. With `glab` authenticated for the right host and project, examples include `glab mr view 42 --comments`, `glab ci get --merge-request=42 --with-job-details` and `glab ci trace 12345`. Check your version's help and confirm the project, pipeline and commit SHA before relying on the results. CI status is tied to the revision that ran. After a CI-driven fix, the lead repeats affected local checks and reviews. CI stays pending until results cover the updated change.
 
 ## Delegation, permissions and limits
 
